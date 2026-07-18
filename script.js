@@ -11,7 +11,7 @@ const table = document.getElementById('blacklistTable');
 // === ЛОКАЛИЗАЦИЯ (I18N) ===
 const translations = {
     ru: {
-        page_title: "EVE Online: Корпоративный Blacklist",
+        page_title: "EVE Online: Общественный чёрный список",
         support_header: "Проект поддерживается сообществом.",
         support_desc_ru: "Для работы сервиса создатель тратит своё личное время. Любая помощь важна для покрытия расходов на домен и стабильность работы.",
         support_in_game_header: "💠 Внутриигровая помощь (ISK)",
@@ -33,7 +33,7 @@ const translations = {
         btn_search: "Искать"
     },
     en: {
-        page_title: "EVE Online: Corporate Blacklist",
+        page_title: "EVE Online: Community Blacklist",
         support_header: "Project is community-supported.",
         support_desc_en: "The creator spends personal time to maintain this service. Any help is important to cover domain costs and ensure stability.",
         support_in_game_header: "💠 In-game Help (ISK)",
