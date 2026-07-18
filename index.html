@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Чёрный список EVE Online</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; color: #333; }
+    h1 { text-align: center; }
+    .controls { text-align: center; margin-bottom: 15px; }
+    input[type="text"] { padding: 8px 12px; width: 300px; border: 1px solid #ccc; border-radius: 4px; }
+    table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 0 6px rgba(0,0,0,0.1); }
+    th, td { border: 1px solid #ddd; padding: 10px 12px; text-align: left; }
+    th { background: #003366; color: white; }
+    a { color: #0066cc; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .status-active { color: darkred; font-weight: bold; }
+    .status-removed { color: gray; text-decoration: line-through; }
+    .no-data { text-align: center; padding: 20px; color: #666; }
+  </style>
+</head>
+<body>
+  <h1>Чёрный список игроков EVE Online</h1>
+
+  <div class="controls">
+    <input type="text" id="search" placeholder="Поиск по имени, причине, доказательствам..." />
+  </div>
+
+  <table id="blacklist-table">
+    <thead>
+      <tr>
+        <th>Имя персонажа</th>
+        <th>Дата добавления</th>
+        <th>Причина</th>
+        <th>Обоснование (доказательства)</th>
+        <th>Статус</th>
+      </tr>
+    </thead>
+    <tbody id="table-body">
+      <!-- Сюда JS подставит строки -->
+    </tbody>
+  </table>
+
+  <p style="text-align:center; margin-top:20px;">
+    Данные обновляются из Google Таблицы. Правки вносит только администратор.
+  </p>
+
+  <script>
+    // ВСТАВЬ СЮДА СВОЙ URL ОТ SHEETDB:
+    const API_URL = 'https://sheetdb.io/api/v1/fup4s2y4l1pqe';
+
+    const tbody = document.getElementById('table-body');
+    const searchInput = document.getElementById('search');
+
+    async function loadData() {
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error('Ошибка загрузки данных');
+        const data = await res.json();
+        renderTable(data);
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="5" class="no-data">Не удалось загрузить данные. Проверьте консоль или URL API.</td></tr>`;
+        console.error(e);
+      }
+    }
+
+    function renderTable(rows) {
+      tbody.innerHTML = '';
+      if (!rows || rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="no-data">Список пуст</td></tr>`;
+        return;
+      }
+      rows.forEach(row => {
+        const statusClass = row.status === 'активен' ? 'status-active' : 'status-removed';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${escapeHtml(row.character_name || '-')}</td>
+          <td>${escapeHtml(row.added_date || '-')}</td>
+          <td>${escapeHtml(row.reason || '-')}</td>
+          <td><a href="${escapeHtml(row.evidence_link || '#')}" target="_blank" rel="noopener noreferrer">Доказательства</a></td>
+          <td class="${statusClass}">${escapeHtml(row.status || '-')}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      applySearch(); // применить текущий поиск после отрисовки
+    }
+
+    function applySearch() {
+      const query = searchInput.value.toLowerCase();
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+      });
+    }
+
+    searchInput.addEventListener('input', applySearch);
+
+    // Защита от XSS (простая)
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
